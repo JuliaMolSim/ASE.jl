@@ -17,7 +17,7 @@ env:
  - PYTHON=""
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; brew install gcc; fi
+  # - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; brew install gcc; fi
 
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
