@@ -1,0 +1,24 @@
+# Documentation: http://docs.travis-ci.com/user/languages/julia/
+language: julia
+
+os:
+  - linux
+  - osx
+
+julia:
+  - 0.6
+
+addons:
+
+notifications:
+  email: false
+
+env:
+ - PYTHON=""
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; brew install gcc; fi
+
+script:
+  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+  - julia -e 'Pkg.clone(pwd()); Pkg.build("ASE"); Pkg.test("ASE"; coverage=true)'
