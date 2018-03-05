@@ -1,33 +1,18 @@
 
 
-"""
-## module ASE
 
-### Summary
-
-Provides Julia wrappers for some of ASE's functionality. Currently:
-
-* `ase.Atoms` becomes `type ASEAtoms`
-* `ase.calculators.neighborlist.NeighborList`
-  should become `ASENeighborList`, but it is ignored to use
-  the `matscipy` neighbourlist instead.
-  TODO: implement ASENeighbourList as backup in case `matscipy` is
-  not available
-* `Atoms.get_array` becomes `get_data`
-* `Atoms.set_array` becomes `set_data!`
-"""
 module ASE
 
 using Reexport
 
 @reexport using JuLIP
+@reexport using PyCall
 
 # the functions to be implemented
 import JuLIP:
       positions, set_positions!,
       cell, set_cell!,             # ✓
       pbc, set_pbc!,               # ✓
-      # set_data!, get_data, has_data,  # ✓
       calculator, set_calculator!, # ✓
       constraint, set_constraint!, # ✓
       neighbourlist,                # ✓
@@ -36,7 +21,9 @@ import JuLIP:
       masses, set_masses!,
       set_transient!,
       atomic_numbers,
-      Atoms, chemical_symbols
+      Atoms, chemical_symbols,
+      get_data, has_data, set_data!,
+      bulk
 
 import Base.length, Base.deleteat!, Base.write, Base.deepcopy,         # ✓
       Base.read, Base.write
@@ -49,6 +36,7 @@ using JuLIP: mat, vecs, JVecF, JVecs, JVecsF, JMatF,
 
 # extra ASE functionality:
 import Base.repeat         # ✓
+
 export ASEAtoms,      # ✓
       AbstractASECalculator, ASECalculator,
       extend!, get_info, set_info!, get_array, set_array!, has_array, has_info,
@@ -56,7 +44,6 @@ export ASEAtoms,      # ✓
       velocities, set_velocities!,
       static_neighbourlist
 
-using PyCall
 
 @pyimport ase.io as ase_io
 @pyimport ase.atoms as ase_atoms
@@ -136,6 +123,8 @@ function deepcopy(at::ASEAtoms)
     return new_at
 end
 
+JuLIP.Chemistry.rnn(s::AbstractString) = rnn(Symbol(s))
+
 # ==========================================
 #    some logic for storing permanent data
 
@@ -207,10 +196,6 @@ end
 has_array(a::ASEAtoms, name) = haskey(PyDict(a.po["arrays"]), name)
 get_array(a::ASEAtoms, name) = a.po[:get_array](string(name))
 function set_array!(a::ASEAtoms, name, value::Array)
-   # if has_transient(a, name) || has_info(a, name)
-   #    error("""cannot set_array!(..., $(name), ...)" since this key already
-   #             exists in either `transient` or `info`""")
-   # end
    a.po[:set_array](string(name), value)
    return a
 end
@@ -219,10 +204,6 @@ end
 has_info(a::ASEAtoms, name) = haskey(PyDict(a.po["info"]), name)
 get_info(a::ASEAtoms, name) = PyDict(a.po["info"])[string(name)]
 function set_info!(a::ASEAtoms, name, value::Any)
-   # if has_transient(a, name) || has_array(a, name)
-   #    error("""cannot set_info!(..., $(name), ...)" since this key already
-   #             exists in either `transient` or `arrays`""")
-   # end
    PyDict(a.po["info"])[string(name)] = value
    return a
 end
@@ -260,45 +241,14 @@ Two examples where `max_change > 0`:
  * Preconditioner is updated only when atom positions change significantly
 """
 function set_transient!(a::ASEAtoms, name, value, max_change=0.0)
-   # if has_array(a, name) || has_info(a, name)
-   #    error("""cannot set_transient!(..., $(name), ...)" since this key already
-   #             exists in either `arrays` or `info`""")
-   # end
    a.transient[name] = TransientData(max_change, 0.0, value)
    return a
 end
 
-# # teach the generic set_data! where to put the data
-# has_data(at::ASEAtoms, name) =
-#    has_array(at, name) || has_info(at, name) || has_transient(at, name)
-#
-# set_data!(at::ASEAtoms, name, value::Any) =
-#    set_info!(at, name, value)
-# set_data!(at::ASEAtoms, name, value::Any, max_change) =
-#    set_transient!(at, name, value, max_change)
-# set_data!(at::ASEAtoms, name, value::Matrix) =
-#    size(value, 2) == length(at) ? set_array!(at, name, value) : set_info!(at, name, value)
-# set_data!{T <: Number}(at::ASEAtoms, name, value::Vector{T}) =
-#    set_array!(at, name, value)
-# set_data!{N,T}(at::ASEAtoms, name, value::Vector{SVec{N,T}}) =
-#    set_array(at, name, value >> mat)
-#
-# function get_data(at::ASEAtoms, name)
-#    # there are three different places where it could be stored, just try all three.
-#    if has_array(at, name)
-#       d = get_array(at, name)
-#       # convert the data to a vector of short vectors
-#       if length(size(d)) > 1
-#          d = vecs(d)
-#       end
-#       return d
-#    elseif has_info(at, name)
-#       return get_info(at, name)
-#    elseif has_transient(at, name)
-#       return get_transient(at, name)
-#    end
-#    error("`get_data`: key $(name) not found")
-# end
+
+get_data(at::ASEAtoms, args...) = get_transient(at, args...)
+has_data(at::ASEAtoms, args...) = has_transient(at::ASEAtoms, args...)
+set_data!(at::ASEAtoms, args...) = set_transient!(at::ASEAtoms, args...)
 
 
 # special arrays: momenta, velocities, masses, chemical_symbols
@@ -351,8 +301,8 @@ import Base.*
 export graphene_nanoribbon, nanotube, molecule
 
 @doc ase_build.bulk[:__doc__] ->
-bulk(args...; pbc=true, kwargs...) =
-   set_pbc!(ASEAtoms(ase_build.bulk(args...; kwargs...)), pbc)
+bulk(s::AbstractString, args...; pbc=true, kwargs...) =
+   set_pbc!(ASEAtoms(ase_build.bulk(s, args...; kwargs...)), pbc)
 
 @doc ase_build.graphene_nanoribbon[:__doc__] ->
 graphene_nanoribbon(args...; kwargs...) =
@@ -384,14 +334,13 @@ include("MatSciPy.jl")
 
 function neighbourlist(at::ASEAtoms, cutoff::Float64;
                         recompute=false)::MatSciPy.NeighbourList
-   # # TODO: also recompute if rcut is different !!!!!
-   # # if no previous neighbourlist is available, compute a new one
-   # if !has_transient(at, (:nlist, cutoff)) || recompute
-   #    # this nlist will be destroyed as soon as positions change
-   #    set_transient!(at, (:nlist, cutoff), MatSciPy.NeighbourList(at, cutoff))
-   # end
-   # return get_transient(at, (:nlist, cutoff))
-   return MatSciPy.NeighbourList(at, cutoff)
+   # TODO: also recompute if rcut is different !!!!!
+   # if no previous neighbourlist is available, compute a new one
+   if !has_transient(at, (:nlist, cutoff)) || recompute
+      # this nlist will be destroyed as soon as positions change
+      set_transient!(at, (:nlist, cutoff), MatSciPy.NeighbourList(at, cutoff))
+   end
+   return get_transient(at, (:nlist, cutoff))
 end
 
 """

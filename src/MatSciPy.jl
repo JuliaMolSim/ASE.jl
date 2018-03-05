@@ -18,22 +18,17 @@ generate a `MatSciPy` neighbourlist.
 """
 module MatSciPy
 
-using PyCall
-# @pyimport matscipy.neighbours as matscipy_neighbours
+using PyCall, NeighbourLists
+
 matscipy_neighbours = pyimport("matscipy.neighbours")
 
-using JuLIP:  AbstractNeighbourList, cutoff, JVecs, vecs, cell
+using JuLIP:  cutoff, JVecs, vecs, cell
 using ..ASEAtoms, ..pyobject
 
-import JuLIP: sites, bonds
+import NeighbourLists: sites, pairs, nsites, npairs
+
 # to implement the iterators
-import Base: start, done, next
-
-# >>>>>>>>> START DEBUG >>>>>>>>
-# TODO: remove once the memory overwrite bug has been fixed
-global _nlist_ctr_ = 0::Int
-# <<<<<<<<< END DEBUG <<<<<<<<<
-
+import Base: start, done, next, length
 
 
 # renamed neighbour_list to __neighbour_list__ to make it clear this is
@@ -62,25 +57,14 @@ function __neighbour_list__(atoms::ASEAtoms,
                         cutoff::Float64,
                         quantities="ijdDS";
                         convertarrays=true)
-   cell(atoms) # TODO: this is a workaround for a weird bug in matscipy (or ase?)
-               #       possibly related to Gideon's bug?
-
    # compute the neighbourlist via matscipy, get the data as
    # PyArrays, i.e., just references, no copies
-
-   # >>>>>>>>> START DEBUG >>>>>>>>
-   global _nlist_ctr_
-   _nlist_ctr_ += 1
-   if _nlist_ctr_ > 100
-      gc()
-      _nlist_ctr_ = 0
-   end
-   # <<<<<<<<< END DEBUG <<<<<<<<<
 
    results = pycall(matscipy_neighbours["neighbour_list"],
                      NTuple{length(quantities), PyArray}, quantities,
                      pyobject(atoms), cutoff)
-   # create Julia arrays referencing the same memory
+   # create Julia arrays ~~~referencing the same memory~~~
+   #   >>> this caused too many problems, now just make copies!
    jresults = [Array(r) for r in results]
    # fix the arrays for later use
    for (idx, quantity) in enumerate(quantities)
@@ -93,8 +77,8 @@ function __neighbour_list__(atoms::ASEAtoms,
       end
       # convert R and S matrices to arrays of vectors
       if convertarrays
-         if quantity == 'D'; jresults[idx] = vecs(jresults[idx]); end
-         if quantity == 'S'; jresults[idx] = vecs(jresults[idx]); end
+         if quantity == 'D'; jresults[idx] = vecs(jresults[idx]'); end
+         if quantity == 'S'; jresults[idx] = vecs(jresults[idx]'); end
       end
    end
    return tuple(jresults..., results)
@@ -111,7 +95,7 @@ nlist = NeighbourList(at, cutoff)
 ```
 where `at::ASEAtoms`, `cutoff::Float64`.
 """
-type NeighbourList <: AbstractNeighbourList
+type NeighbourList
     cutoff::Float64
     i::Vector{Int32}
     j::Vector{Int32}
@@ -129,13 +113,14 @@ end
 NeighbourList(at::ASEAtoms, cutoff::Float64) =
    NeighbourList(cutoff, __neighbour_list__(at, cutoff)..., length(at) )
 
-import Base.length
-length(nlist::NeighbourList) = length(nlist.i)
+
+npairs(nlist::NeighbourList) = length(nlist.i)
+nsites(nlist::NeighbourList) = nlist.length
 
 ######################################################################
 #### implementation of some iterators
 
-bonds(nlist::NeighbourList) = zip(nlist.i, nlist.j, nlist.r, nlist.R, nlist.S)
+pairs(nlist::NeighbourList) = zip(nlist.i, nlist.j, nlist.r, nlist.R)
 
 # iterator over sites
 type Sites
@@ -153,17 +138,17 @@ end
 
 # first index is the site index, second index is the index into the nlist
 start(s::Sites) = SiteItState(0, 0)
-done(s::Sites, state::SiteItState) = (state.b == length(s.nlist))
+done(s::Sites, state::SiteItState) = (state.b == npairs(s.nlist))
 
 function next(s::Sites, state::SiteItState)
    state.s += 1
    m0 = state.b+1
-   while state.b < length(s.nlist) && s.nlist.i[state.b+1] <= state.s
+   while state.b < npairs(s.nlist) && s.nlist.i[state.b+1] <= state.s
       state.b += 1
    end
    m1 = state.b
    return (state.s, view(s.nlist.j, m0:m1), view(s.nlist.r, m0:m1),
-               view(s.nlist.R, m0:m1), view(s.nlist.S, m0:m1)), state
+               view(s.nlist.R, m0:m1)), state
 end
 
 

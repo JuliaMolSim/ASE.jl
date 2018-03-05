@@ -22,8 +22,7 @@ function pip(pkgname)
 end
 
 
-
-println("Installing Dependencies of `JuLIP.jl`: `ase` and `matscipy`")
+println("Installing Dependencies of `ASE.jl`: `ase` and `matscipy`")
 
 if is_unix()
    try

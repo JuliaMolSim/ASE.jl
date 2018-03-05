@@ -1,10 +1,7 @@
 
-println("-------------------")
-println(" Testing JuLIP.ASE")
-println("-------------------")
 
-using JuLIP
-using JuLIP.ASE
+using ASE, NeighbourLists
+
 
 # ======================================================================
 
@@ -17,8 +14,7 @@ at = bulk("Al", cubic=true)
 # ======================================================================
 
 println("Check neighbourlist without periodicity")
-# TODO: implement a test with periodicity!!!
-println("   TODO: implement test with periodicity as well?")
+# TODO: implement a test with periodicity as well???
 println("   ... assemble neighbour list ...")
 at = bulk("Al", cubic=true) * 3
 set_pbc!(at, (false,false,false))
@@ -34,9 +30,9 @@ for n = 2:length(at), m = 1:n-1
 end
 println("   ... check the bond-iterator ... ")
 pass_bonds_test = true
-for (i,j,r,R,S) in bonds(nlist)
+for (i,j,r,R) in pairs(nlist)
    if !( (simple[i,j] == 1) && (abs(norm(X[i]-X[j]) - r) < 1e-12) &&
-         (norm(X[j]-X[i] - R) < 1e-12) && (norm(S) == 0) )
+         (norm(X[j]-X[i] - R) < 1e-12)  )
       pass_bonds_test = false
       break
    end
@@ -50,7 +46,7 @@ end
 simple *= -1
 println("   ... check the site iterator ... ")
 pass_site_test = true
-for (i,j,r,R,S) in sites(nlist)
+for (i,j,r,R) in sites(nlist)
    for n = 1:length(j)
       if simple[i,j[n]] != 1
          pass_site_test = false
@@ -76,27 +72,12 @@ N = length(at)
 z = rand(N)
 set_array!(at, "z", z)
 @test get_array(at, "z") == z
-# @test get_data(at, "z") == z
-# set data and check it is read as an array
-# set_data!(at, "y", z)
-# @test get_array(at, "y") == z
 # set some info and test reading
 i = "some info"
 set_info!(at, "i", i)
 @test get_info(at, "i") == i
-# @test get_data(at, "i") == i
-# Now try to set an array "i" and check that we get an error
-caught = false
-try
-   set_array!(at, "i", z)
-catch
-   caught = true
-end
-@test caught
 # ***_transient should be tested automatically via the calculators.
 # test the has_***
-# @test has_data(at, "z")
-# @test has_data(at, "i")
 @test has_array(at, "z")
 @test has_info(at, "i")
 @test !has_array(at, "i")
@@ -136,6 +117,15 @@ rm(fname)
 
 
 
+# ---------
+println("Conversion between JuLIP.Atoms and ASEAtoms")
+at1 = JuLIP.bulk(:Si)    # JuLIP.Atoms
+at2 = ASEAtoms(at1)      # ASE.ASEAtoms
+at3 = Atoms(at2)         # JuLIP.Atoms
+@assert at1 == at3
+
+
+
 # IMPORTED FROM TESTPOTENTIALS:
 
 # # [2] ASE's EMT calculator
@@ -153,3 +143,18 @@ rm(fname)
 # println(" |Frc_ase - Frc_jl = ", maxnorm(forces(at) - forces(at2)))
 # println("--------------------------------------------------")
 # @test abs(energy(at) - energy(at2)) < 1e-10
+
+
+println("attempt to work with an ASECalculator")
+at = bulk("Cu", cubic=true) * 2    # generate periodic Cu supercell
+deleteat!(at, 1)                       # vacancy defect
+try
+   @pyimport ase.calculators.emt as emt   # import the EMT model
+   calc = ASECalculator(emt.EMT())        # wrap it into a Julia Object
+   @show energy(calc, at)                 # compute the energy
+   @show maximum(norm.(forces(calc, at)))
+   @test true
+catch
+   println("failed ASECalculator Test")
+   @test false
+end
