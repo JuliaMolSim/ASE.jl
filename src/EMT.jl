@@ -6,12 +6,14 @@
 # TODO: make it FAST FAST FAST (competitive with ASAP)
 #
 
+module EMT
 
-using JuLIP: AbstractCalculator, neighbourlist
-import JuLIP.Potentials: cutsw, cutsw_d, evaluate, evaluate_d, HS
-using JuLIP.ASE: ASEAtoms, chemical_symbols
-using PyCall
+using JuLIP, PyCall, NeighbourLists
+using ASE: ASEAtoms, chemical_symbols
+using JuLIP.Potentials: WrappedAnalyticFunction, F64fun,
+                        cutsw, cutsw_d, evaluate, evaluate_d, HS
 
+import JuLIP.Potentials: energy, forces
 
 # get access to the atomic numbers
 @pyimport ase.calculators.emt as ase_emt
@@ -23,7 +25,7 @@ using PyCall
 in Julia, largely for fun and comparison with Python; the goal is to make this
 so efficient that it can compete with ASAP.
 """
-type EMTCalculator <: Potential
+mutable struct EMTCalculator <: AbstractCalculator
    pair::Vector{HS{WrappedAnalyticFunction}}
    Cpair::Vector{Float64}
    rho::Vector{HS{WrappedAnalyticFunction}}
@@ -133,7 +135,7 @@ end
 function energy(calc::EMTCalculator, at::ASEAtoms)
    E = 0.0
    ρ̄ = zeros(length(at))   # store the array of electron densities
-   for (i,j,r,_,_) in bonds(at, cutoff(calc))
+   for (i,j,r,_) in pairs(at, cutoff(calc))
       si, sj = calc.ind[i], calc.ind[j]
       E += calc.Cpair[si] * calc.pair[sj](r)
       ρ̄[i] += calc.rho[sj](r)
@@ -151,7 +153,7 @@ function forces(calc::EMTCalculator, at::ASEAtoms)
    ρ̄ = zeros(length(at))      # store the array of electron densities
    dρ̄ = zerovecs(length(at))  #   ... + derivatives
    nlist = neighbourlist(at, cutoff(calc))
-   for (i,j,r,R,_) in bonds(nlist)
+   for (i,j,r,R) in pairs(nlist)
       si, sj = calc.ind[i], calc.ind[j]
       # E += calc.Cpair[si] * calc.pair[sj](r)
       dV = (calc.Cpair[si] * (@D calc.pair[sj](r)) / r) * R
@@ -166,7 +168,7 @@ function forces(calc::EMTCalculator, at::ASEAtoms)
       dF[n] = @D calc.embed[sn](ρ̄[n])
    end
    # compute the resulting forces from the embedding terms
-   for (i,j,r,R,_) in bonds(nlist)
+   for (i,j,r,R) in pairs(nlist)
       # ρ̄[i] += calc.rho[sj](r)
       # E += calc.embed[sn](ρ̄[n])
       sj = calc.ind[j]
@@ -175,4 +177,7 @@ function forces(calc::EMTCalculator, at::ASEAtoms)
       dE[i] += dF[i] * dρ
    end
    return dE
+end
+
+
 end

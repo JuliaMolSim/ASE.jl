@@ -123,38 +123,3 @@ at1 = JuLIP.bulk(:Si)    # JuLIP.Atoms
 at2 = ASEAtoms(at1)      # ASE.ASEAtoms
 at3 = Atoms(at2)         # JuLIP.Atoms
 @assert at1 == at3
-
-
-
-# IMPORTED FROM TESTPOTENTIALS:
-
-# # [2] ASE's EMT calculator
-# emt = JuLIP.ASE.EMTCalculator()
-# at = rattle!( set_pbc!( bulk("Cu", cubic=true) * 2, (true,false,false) ), 0.1 )
-# set_calculator!(at, emt)
-# if notCI
-#    push!(calculators, (emt, at))
-# end
-
-# println("--------------------------------------------------")
-# println(" EMT Consistency test: ")
-# println("--------------------------------------------------")
-# println(" E_ase - E_jl = ", energy(at) - energy(at2))
-# println(" |Frc_ase - Frc_jl = ", maxnorm(forces(at) - forces(at2)))
-# println("--------------------------------------------------")
-# @test abs(energy(at) - energy(at2)) < 1e-10
-
-
-println("attempt to work with an ASECalculator")
-at = bulk("Cu", cubic=true) * 2    # generate periodic Cu supercell
-deleteat!(at, 1)                       # vacancy defect
-try
-   @pyimport ase.calculators.emt as emt   # import the EMT model
-   calc = ASECalculator(emt.EMT())        # wrap it into a Julia Object
-   @show energy(calc, at)                 # compute the energy
-   @show maximum(norm.(forces(calc, at)))
-   @test true
-catch
-   println("failed ASECalculator Test")
-   @test false
-end

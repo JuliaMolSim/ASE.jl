@@ -7,10 +7,9 @@ Julia Bindings for the [Atomic Simulation Environment (ASE)](https://wiki.fysik.
 
 ### Summary
 
-Provides Julia wrappers for some of ASE's functionality, to be used within
+Provides Julia wrappers for a limited subset of ASE's functionality, to be used within
 [JuLIP.jl](https://github.com/libAtoms/JuLIP.jl). On top of `JuLIP.jl`, which is
 a pure Julia library, `ASE.jl` also provides an interface to ASE, via [PyCall.jl].
-
 
 ### Getting Started
 
@@ -28,14 +27,13 @@ deleteat!(at, 1)                       # vacancy defect
 calc = ASECalculator(emt.EMT())        # wrap it into a Julia Object
 @show energy(calc, at)                 # compute the energy
 # -------------------------------------------
-#  or to use more of the Julia framework:
+#  or to use more of the JuLIP framework:
 # -------------------------------------------
 set_calculator!(at, calc)
 set_constraint!(at, FixedCell(at))
 minimise!(at)
 @show energy(at)
 ```
-
 
 
 Note that in `ASE.jl` a bulk cell is generated using `bulk("Cu")` while

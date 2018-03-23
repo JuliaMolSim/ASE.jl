@@ -490,17 +490,17 @@ read(filename::AbstractString) = ASEAtoms(ase_io.read(filename))
 # ------------------ Conversion to and from ASE Objects -----------------
 #
 # TODO: write tests for consistency of these conversions
-#       for the new test_ase code
+#       for the new test_ase code  \\  X, P, M, Z, cell, pbc
 
 Atoms(at_ase::ASE.ASEAtoms) =
    Atoms( positions(at_ase),
           momenta(at_ase),
-          ASE.masses(at_ase),
-          ASE.atomic_numbers(at_ase),
+          masses(at_ase),
+          atomic_numbers(at_ase),
           JMat{Float64}(cell(at_ase)),
-          pbc(at_ase),
-          calculator(at_ase),
-          constraint(at_ase) )
+          pbc(at_ase);
+          calc = calculator(at_ase),
+          cons = constraint(at_ase) )
 
 function ASEAtoms(at::Atoms)
    # simplify by assuming there is only one species
@@ -514,5 +514,9 @@ function ASEAtoms(at::Atoms)
    set_calculator!(at_ase, calculator(at))
    set_constraint!(at_ase, constraint(at))
 end
+
+
+# ----------- The Julia implementation of EMT (kind of for fun) ----------
+include("EMT.jl")
 
 end # module
