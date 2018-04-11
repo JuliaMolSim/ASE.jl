@@ -25,8 +25,7 @@ import JuLIP:
       get_data, has_data, set_data!,
       bulk
 
-import Base.length, Base.deleteat!, Base.write, Base.deepcopy,         # ✓
-      Base.read, Base.write
+import Base.length, Base.deleteat!, Base.deepcopy        # ✓
 
 # from arrayconversions:
 using JuLIP: mat, vecs, JVecF, JVecs, JVecsF, JMatF,
