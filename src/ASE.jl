@@ -25,7 +25,7 @@ import JuLIP:
       get_data, has_data, set_data!,
       bulk
 
-import Base.length, Base.deleteat!, Base.deepcopy        # ✓
+import Base.length, Base.deleteat!, Base.deepcopy
 
 # from arrayconversions:
 using JuLIP: mat, vecs, JVecF, JVecs, JVecsF, JMatF,
@@ -59,7 +59,7 @@ export ASEAtoms,      # ✓
 some data which needs to be updated if the configuration (positions only!) has
 changed too much.
 """
-struct TransientData
+type TransientData
    max_change::Float64    # how much X may change before recomputing
    accum_change::Float64   # how much has it changed already
    data::Any
@@ -77,7 +77,7 @@ Julia wrapper for the ASE `Atoms` class.
 
 For internal usage there is also a constructor `ASEAtoms(po::PyObject)`
 """
-mutable struct ASEAtoms <: AbstractAtoms
+type ASEAtoms <: AbstractAtoms
    po::PyObject       # ase.Atoms instance
    calc::AbstractCalculator
    cons::AbstractConstraint
@@ -373,7 +373,7 @@ abstract type AbstractASECalculator <: AbstractCalculator end
 """
 Concrete subtype of ASECalculator for classical potentials
 """
-struct ASECalculator <: AbstractASECalculator
+type ASECalculator <: AbstractASECalculator
    po::PyObject
 end
 
@@ -516,6 +516,6 @@ end
 
 
 # ----------- The Julia implementation of EMT (kind of for fun) ----------
-# include("EMT.jl")
+include("EMT.jl")
 
 end # module
