@@ -59,11 +59,7 @@ export ASEAtoms,      # ✓
 some data which needs to be updated if the configuration (positions only!) has
 changed too much.
 """
-<<<<<<< HEAD
 mutable struct TransientData
-=======
-type TransientData
->>>>>>> 292e216bd9f22929d9741284ea001b27b9f8d5f1
    max_change::Float64    # how much X may change before recomputing
    accum_change::Float64   # how much has it changed already
    data::Any
