@@ -11,12 +11,13 @@ from ase.optimize.optimize import Optimizer
 from julia import Julia
 julia = Julia()
 julia.using("JuLIP")
+julia.using("ASE")
 
 # Workaround limitiation in PyCall that does not allow types to be called
 #   https://github.com/JuliaPy/PyCall.jl/issues/319
 
-ASEAtoms = julia.eval('ASEAtoms(a) = JuLIP.ASE.ASEAtoms(a)')
-ASECalculator = julia.eval('ASECalculator(c) = JuLIP.ASE.ASECalculator(c)')
+ASEAtoms = julia.eval('ASEAtoms(a) = ASE.ASEAtoms(a)')
+ASECalculator = julia.eval('ASECalculator(c) = ASE.ASECalculator(c)')
 fixedcell = julia.eval('fixedcell(a) = JuLIP.Constraints.FixedCell(a)')
 variablecell = julia.eval('variablecell(a) = JuLIP.Constraints.VariableCell(a)')
 
