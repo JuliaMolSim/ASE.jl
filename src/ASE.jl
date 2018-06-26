@@ -518,4 +518,27 @@ end
 # ----------- The Julia implementation of EMT (kind of for fun) ----------
 include("EMT.jl")
 
+
+
+# -------------- JuLIP NeighbourList Patch -------------
+using PyCall
+import NeighbourLists
+matscipy_neighbours = pyimport("matscipy.neighbours")
+function asenlist(at::Atoms, rcut)
+   pyat = ASEAtoms(at).po
+   return matscipy_neighbours[:neighbour_list]("ijdD", pyat, rcut)
+end
+
+function matscipy_nlist(at::Atoms{T}, rcut::T; recompute=false, kwargs...) where T <: AbstractFloat
+   i, j, r, R = asenlist(at, rcut)
+   i = copy(i)+1
+   j = copy(j)+1
+   r = copy(r)
+   R = vecs(copy(R'))
+   first = NeighbourLists.get_first(i, length(at))
+   NeighbourLists.sort_neigs!(j, r, R, first)
+   return NeighbourLists.PairList(positions(at), rcut, i, j, r, R, first)
+end
+
+
 end # module
