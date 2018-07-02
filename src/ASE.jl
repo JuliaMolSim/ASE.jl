@@ -130,7 +130,7 @@ JuLIP.Chemistry.rnn(s::AbstractString) = rnn(Symbol(s))
 # temporarily reverted to the old `positions` implementation
 # due to a bug in TightBinding.jl
 
-positions(at::ASEAtoms) = Matrix{Float64}(at.po[:positions])' |> vecs
+positions(at::ASEAtoms) = Matrix{Float64}(at.po["positions"])' |> vecs
 
 
 function set_positions!(a::ASEAtoms, p::JVecsF)
