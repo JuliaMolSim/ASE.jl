@@ -546,9 +546,9 @@ end
 
 
 
-energy(V::AbstractAtoms, at::ASEAtoms) = energy(V, Atoms(at))
-forces(V::AbstractAtoms, at::ASEAtoms) = forces(V, Atoms(at))
-virial(V::AbstractAtoms, at::ASEAtoms) = virial(V, Atoms(at))
-stress(V::AbstractAtoms, at::ASEAtoms) = stress(V, Atoms(at))
+energy(V::AbstractCalculator, at::ASEAtoms) = energy(V, Atoms(at))
+forces(V::AbstractCalculator, at::ASEAtoms) = forces(V, Atoms(at))
+virial(V::AbstractCalculator, at::ASEAtoms) = virial(V, Atoms(at))
+stress(V::AbstractCalculator, at::ASEAtoms) = stress(V, Atoms(at))
 
 end # module
