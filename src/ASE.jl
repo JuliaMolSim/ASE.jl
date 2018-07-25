@@ -16,7 +16,7 @@ import JuLIP:
       calculator, set_calculator!, # ✓
       constraint, set_constraint!, # ✓
       neighbourlist,                # ✓
-      energy, forces, virial,
+      energy, forces, virial, stress,
       momenta, set_momenta!,
       masses, set_masses!,
       set_transient!,
@@ -540,5 +540,15 @@ function matscipy_nlist(at::Atoms{T}, rcut::T; recompute=false, kwargs...) where
    return NeighbourLists.PairList(positions(at), rcut, i, j, r, R, first)
 end
 
+
+
+# -------------- Calling a JuLIP Calculator on ASEAtoms --------------
+
+
+
+energy(V::AbstractAtoms, at::ASEAtoms) = energy(V, Atoms(at))
+forces(V::AbstractAtoms, at::ASEAtoms) = forces(V, Atoms(at))
+virial(V::AbstractAtoms, at::ASEAtoms) = virial(V, Atoms(at))
+stress(V::AbstractAtoms, at::ASEAtoms) = stress(V, Atoms(at))
 
 end # module
