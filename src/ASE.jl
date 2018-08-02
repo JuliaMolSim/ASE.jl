@@ -41,7 +41,9 @@ export ASEAtoms,      # ✓
       extend!, get_info, set_info!, get_array, set_array!, has_array, has_info,
       get_transient, has_transient,
       velocities, set_velocities!,
-      static_neighbourlist
+      static_neighbourlist,
+      read_xyz, write_xyz
+
 
 
 @pyimport ase.io as ase_io
@@ -447,42 +449,42 @@ end
 extend!(at::ASEAtoms, S::AbstractString, x::JVecF) = extend!(at, ASEAtoms(S, [x]))
 
 """
-* `write(filename, at, mode=:write)` : write atoms object to `filename`
-* `write(filehandle, at)` : write atoms object as xyz file
-* `write(filename, ats::Vector{ASEAtoms}, mode=:write)` : write a time series to a file
-* `write(filename, at, x::Vector{Dofs}, mode=:write)` : write a time series to a file
+* `write_xyz(filename, at, mode=:write)` : write atoms object to `filename`
+* `write_xyz(filehandle, at)` : write atoms object as xyz file
+* `write_xyz(filename, ats::Vector{ASEAtoms}, mode=:write)` : write a time series to a file
+* `write_xyz(filename, at, x::Vector{Dofs}, mode=:write)` : write a time series to a file
 
 to append to an existing file, use `:append` or `"a"` instead of `:write`.
 """
-write(filename::AbstractString, at::ASEAtoms, mode=:write) =
-   mode == :write ? ase_io.write(filename, at.po) : write(filename, [at], mode)
+write_xyz(filename::AbstractString, at::ASEAtoms, mode=:write) =
+   mode == :write ? ase_io.write(filename, at.po) : write_xyz(filename, [at], mode)
 
-write(filehandle::PyObject, at::ASEAtoms) = ase_io.write(filehandle, at.po, format="xyz")
+write_xyz(filehandle::PyObject, at::ASEAtoms) = ase_io.write(filehandle, at.po, format="xyz")
 
 # open and close files from Python (to get a python filehandle)
 pyopenf(filename::AbstractString, mode::AbstractString) = py"open($(filename), $(mode))"
 pyclosef(filehandle) = filehandle[:close]()
 
-function write(filename::AbstractString, at::ASEAtoms, xs::AbstractVector{Dofs}, mode=:write)
+function write_xyz(filename::AbstractString, at::ASEAtoms, xs::AbstractVector{Dofs}, mode=:write)
    x0 = dofs(at) # save the dofs
    filehandle = pyopenf(filename, string(mode)[1:1])
    for x in xs
-     write(filehandle, set_dofs!(at, x))
+     write_xyz(filehandle, set_dofs!(at, x))
    end
    pyclosef(filehandle)
    set_dofs!(at, x0)   # revert to original configuration
 end
 
-function write(filename::AbstractString, ats::AbstractVector{ASEAtoms}, mode=:write)
+function write_xyz(filename::AbstractString, ats::AbstractVector{ASEAtoms}, mode=:write)
    filehandle = pyopenf(filename, string(mode)[1:1])
    for at in ats
-      write(filehandle, at)
+      write_xyz(filehandle, at)
    end
    pyclosef(filehandle)
 end
 
 
-read(filename::AbstractString) = ASEAtoms(ase_io.read(filename))
+read_xyz(filename::AbstractString) = ASEAtoms(ase_io.read(filename))
 
 
 
