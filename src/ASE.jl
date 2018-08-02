@@ -107,7 +107,7 @@ ASEAtoms(s::AbstractString) = ASEAtoms(ase_atoms.Atoms(s))
 pyobject(a::ASEAtoms) = a.po
 
 
-length(at::ASEAtoms) = Int(at.po["positions"]["shape"][1])
+length(at::ASEAtoms) = size(at.po[:get_positions](), 1)
 
 
 """
@@ -130,7 +130,7 @@ JuLIP.Chemistry.rnn(s::AbstractString) = rnn(Symbol(s))
 # temporarily reverted to the old `positions` implementation
 # due to a bug in TightBinding.jl
 
-positions(at::ASEAtoms) = Matrix{Float64}(at.po["positions"])' |> vecs
+positions(at::ASEAtoms) = at.po[:get_positions]()' |> vecs
 
 
 function set_positions!(a::ASEAtoms, p::JVecsF)
