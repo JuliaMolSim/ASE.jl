@@ -327,40 +327,40 @@ end
          ASEAtoms(ase_build.molecule(args...; kwargs...))
 
 
-############################################################
-# matscipy neighbourlist functionality
-############################################################
-
-include("MatSciPy.jl")
-
-function neighbourlist(at::ASEAtoms, cutoff::Float64;
-                        recompute=false)::MatSciPy.NeighbourList
-   # TODO: also recompute if rcut is different !!!!!
-   # if no previous neighbourlist is available, compute a new one
-   if !has_transient(at, (:nlist, cutoff)) || recompute
-      # this nlist will be destroyed as soon as positions change
-      set_transient!(at, (:nlist, cutoff), MatSciPy.NeighbourList(at, cutoff))
-   end
-   return get_transient(at, (:nlist, cutoff))
-end
-
-"""
-`static_neighbourlist(at::ASEAtoms, rcut::Float64)`
-
-This function first checks whether a static neighbourlist already exists
-with cutoff `rcut` and if it does then it returns the existing list.
-If it does not, then it computes a new neighbour list with the current
-configuration, stores it for later use and returns it.
-"""
-function static_neighbourlist(at::ASEAtoms, rcut::Float64)
-   if !has_transient(at, (:snlist, rcut))
-      set_transient!( at, (:snlist, rcut),
-                          MatSciPy.NeighbourList(at, rcut),
-                          Inf )    # Inf means this is never deleted!
-   end
-   return get_transient(at, (:snlist, rcut))
-end
-
+# ############################################################
+# # matscipy neighbourlist functionality
+# ############################################################
+#
+# include("MatSciPy.jl")
+#
+# function neighbourlist(at::ASEAtoms, cutoff::Float64;
+#                         recompute=false)::MatSciPy.NeighbourList
+#    # TODO: also recompute if rcut is different !!!!!
+#    # if no previous neighbourlist is available, compute a new one
+#    if !has_transient(at, (:nlist, cutoff)) || recompute
+#       # this nlist will be destroyed as soon as positions change
+#       set_transient!(at, (:nlist, cutoff), MatSciPy.NeighbourList(at, cutoff))
+#    end
+#    return get_transient(at, (:nlist, cutoff))
+# end
+#
+# """
+# `static_neighbourlist(at::ASEAtoms, rcut::Float64)`
+#
+# This function first checks whether a static neighbourlist already exists
+# with cutoff `rcut` and if it does then it returns the existing list.
+# If it does not, then it computes a new neighbour list with the current
+# configuration, stores it for later use and returns it.
+# """
+# function static_neighbourlist(at::ASEAtoms, rcut::Float64)
+#    if !has_transient(at, (:snlist, rcut))
+#       set_transient!( at, (:snlist, rcut),
+#                           MatSciPy.NeighbourList(at, rcut),
+#                           Inf )    # Inf means this is never deleted!
+#    end
+#    return get_transient(at, (:snlist, rcut))
+# end
+#
 
 ######################################################
 #    Attaching an ASE-style calculator
@@ -522,25 +522,25 @@ include("EMT.jl")
 
 
 
-# -------------- JuLIP NeighbourList Patch -------------
-using PyCall
-import NeighbourLists
-matscipy_neighbours = pyimport("matscipy.neighbours")
-function asenlist(at::Atoms, rcut)
-   pyat = ASEAtoms(at).po
-   return matscipy_neighbours[:neighbour_list]("ijdD", pyat, rcut)
-end
-
-function matscipy_nlist(at::Atoms{T}, rcut::T; recompute=false, kwargs...) where T <: AbstractFloat
-   i, j, r, R = asenlist(at, rcut)
-   i = copy(i)+1
-   j = copy(j)+1
-   r = copy(r)
-   R = vecs(copy(R'))
-   first = NeighbourLists.get_first(i, length(at))
-   NeighbourLists.sort_neigs!(j, r, R, first)
-   return NeighbourLists.PairList(positions(at), rcut, i, j, r, R, first)
-end
+# # -------------- JuLIP NeighbourList Patch -------------
+# using PyCall
+# import NeighbourLists
+# matscipy_neighbours = pyimport("matscipy.neighbours")
+# function asenlist(at::Atoms, rcut)
+#    pyat = ASEAtoms(at).po
+#    return matscipy_neighbours[:neighbour_list]("ijdD", pyat, rcut)
+# end
+#
+# function matscipy_nlist(at::Atoms{T}, rcut::T; recompute=false, kwargs...) where T <: AbstractFloat
+#    i, j, r, R = asenlist(at, rcut)
+#    i = copy(i)+1
+#    j = copy(j)+1
+#    r = copy(r)
+#    R = vecs(copy(R'))
+#    first = NeighbourLists.get_first(i, length(at))
+#    NeighbourLists.sort_neigs!(j, r, R, first)
+#    return NeighbourLists.PairList(positions(at), rcut, i, j, r, R, first)
+# end
 
 
 
