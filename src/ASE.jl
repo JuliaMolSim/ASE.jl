@@ -1,4 +1,8 @@
 
+using PyCall
+@pyimport ase.io as ase_io
+@pyimport ase.atoms as ase_atoms
+@pyimport ase.build as ase_build
 
 
 module ASE
@@ -43,8 +47,6 @@ export ASEAtoms,      # ✓
       velocities, set_velocities!,
       static_neighbourlist,
       read_xyz, write_xyz
-
-
 
 @pyimport ase.io as ase_io
 @pyimport ase.atoms as ase_atoms
@@ -301,11 +303,11 @@ import Base.*
 
 export graphene_nanoribbon, nanotube, molecule
 
-@doc ase_build.bulk[:__doc__] ->
+# @doc ase_build.bulk[:__doc__] ->
 bulk(s::AbstractString, args...; pbc=true, kwargs...) =
    set_pbc!(ASEAtoms(ase_build.bulk(s, args...; kwargs...)), pbc)
 
-@doc ase_build.graphene_nanoribbon[:__doc__] ->
+# @doc ase_build.graphene_nanoribbon[:__doc__] ->
 graphene_nanoribbon(args...; kwargs...) =
    ASEAtoms(ase_build.graphene_nanoribbon(args...; kwargs...))
 
@@ -322,9 +324,9 @@ function nanotube(args...; kwargs...)
    return at
 end
 
-@doc ase_build.molecule[:__doc__] ->
-      molecule(args...; kwargs...) =
-         ASEAtoms(ase_build.molecule(args...; kwargs...))
+# @doc ase_build.molecule[:__doc__] ->
+molecule(args...; kwargs...) =
+   ASEAtoms(ase_build.molecule(args...; kwargs...))
 
 
 # ############################################################
@@ -518,7 +520,7 @@ end
 
 
 # ----------- The Julia implementation of EMT (kind of for fun) ----------
-include("EMT.jl")
+# include("EMT.jl")
 
 
 
