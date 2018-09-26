@@ -95,7 +95,7 @@ nlist = NeighbourList(at, cutoff)
 ```
 where `at::ASEAtoms`, `cutoff::Float64`.
 """
-type NeighbourList
+mutable struct NeighbourList
     cutoff::Float64
     i::Vector{Int32}
     j::Vector{Int32}
@@ -123,7 +123,7 @@ nsites(nlist::NeighbourList) = nlist.length
 pairs(nlist::NeighbourList) = zip(nlist.i, nlist.j, nlist.r, nlist.R)
 
 # iterator over sites
-type Sites
+mutable struct Sites
    nlist::NeighbourList
 end
 
@@ -131,7 +131,7 @@ length(s::Sites) = s.nlist.length
 
 sites(nlist::NeighbourList) = Sites(nlist)
 
-type SiteItState
+mutable struct SiteItState
    s::Int   # site index
    b::Int   # bond index
 end

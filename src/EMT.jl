@@ -37,7 +37,7 @@ end
 EMTCalculator(n::Int) = EMTCalculator(
          Vector{HS{WrappedAnalyticFunction}}(n), Vector{Float64}(n),   # pair, Cpair
          Vector{HS{WrappedAnalyticFunction}}(n),
-         Vector{WrappedAnalyticFunction}(n), Vector{Int}(0), 0.0 )
+         Vector{WrappedAnalyticFunction}(n), Vector{Int}(), 0.0 )
 
 cutoff(calc::EMTCalculator) = calc.rc + 0.5
 

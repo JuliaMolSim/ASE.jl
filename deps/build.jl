@@ -25,7 +25,7 @@ end
 
 println("Installing Dependencies of `ASE.jl`: `ase` and `matscipy`")
 
-if is_unix()
+if Sys.isunix()
    try
       @pyimport ase as _ase_
    catch
