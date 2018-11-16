@@ -3,7 +3,8 @@ using PyCall
 function checkpip()
    # Import pip
    try
-       @pyimport pip
+      pipver = `$(PyCall.python) -m pip --version`
+      run(`$(pipver)`)
    catch
        # If it is not found, install it
        println("""I couldn't find `pip`. I will try to download and install it
