@@ -17,7 +17,7 @@ end
 
 function pip(pkgname)
    checkpip()
-   pipcmd = `$(PyCall.pyprogramname[1:end-6])pip install --upgrade --user $(pkgname)`
+   pipcmd = `$(PyCall.python) -m pip install --upgrade --user $(pkgname)`
    run(`$(pipcmd)`)
 end
 
