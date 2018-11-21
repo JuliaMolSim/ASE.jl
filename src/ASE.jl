@@ -1,8 +1,8 @@
 
-using PyCall
-@pyimport ase.io as ase_io
-@pyimport ase.atoms as ase_atoms
-@pyimport ase.build as ase_build
+# using PyCall
+# @pyimport ase.io as ase_io
+# @pyimport ase.atoms as ase_atoms
+# @pyimport ase.build as ase_build
 
 
 module ASE
@@ -48,9 +48,9 @@ export ASEAtoms,      # ✓
       static_neighbourlist,
       read_xyz, write_xyz
 
-@pyimport ase.io as ase_io
-@pyimport ase.atoms as ase_atoms
 @pyimport ase.build as ase_build
+@pyimport ase.atoms as ase_atoms
+@pyimport ase.io as ase_io
 
 
 #################################################################
@@ -377,7 +377,7 @@ abstract type AbstractASECalculator <: AbstractCalculator end
 """
 Concrete subtype of ASECalculator for classical potentials
 """
-type ASECalculator <: AbstractASECalculator
+mutable struct ASECalculator <: AbstractASECalculator
    po::PyObject
 end
 
