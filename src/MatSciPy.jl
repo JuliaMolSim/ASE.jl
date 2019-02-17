@@ -28,7 +28,7 @@ using ASE: ASEAtoms, pyobject
 import NeighbourLists: sites, pairs, nsites, npairs
 
 # to implement the iterators
-import Base: start, done, next, length
+import Base: iterate, length
 
 
 # renamed neighbour_list to __neighbour_list__ to make it clear this is
@@ -137,10 +137,11 @@ mutable struct SiteItState
 end
 
 # first index is the site index, second index is the index into the nlist
-start(s::Sites) = SiteItState(0, 0)
+iterate(s::Sites) = (state = SiteItState(0, 0); iterate(s, state))
 done(s::Sites, state::SiteItState) = (state.b == npairs(s.nlist))
 
-function next(s::Sites, state::SiteItState)
+function iterate(s::Sites, state::SiteItState)
+   if done(s, state); return nothing; end
    state.s += 1
    m0 = state.b+1
    while state.b < npairs(s.nlist) && s.nlist.i[state.b+1] <= state.s
