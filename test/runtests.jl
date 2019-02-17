@@ -1,6 +1,6 @@
 
 using ASE
-using Base.Test
+using Test
 
 println("-------------------")
 println(" Testing ASE.jl")

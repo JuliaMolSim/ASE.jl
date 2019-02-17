@@ -81,7 +81,7 @@ Julia wrapper for the ASE `Atoms` class.
 
 For internal usage there is also a constructor `ASEAtoms(po::PyObject)`
 """
-type ASEAtoms <: AbstractAtoms
+mutable struct ASEAtoms <: AbstractAtoms
    po::PyObject       # ase.Atoms instance
    calc::AbstractCalculator
    cons::AbstractConstraint
@@ -270,7 +270,7 @@ set_masses!(at::ASEAtoms, m::Vector{Float64}) = at.po[:set_masses](m)
 "return vector of chemical symbols as strings"
 chemical_symbols(at::ASEAtoms) = pyobject(at)[:get_chemical_symbols]()
 "set the chemical symbols"
-set_chemical_symbols!{T <: AbstractString}(at::ASEAtoms, s::Vector{T}) =
+set_chemical_symbols!(at::ASEAtoms, s::Vector{T}) where {T <: AbstractString} =
    pyobject(at)[:set_chemical_symbols](s)
 "return vector of atomic numbers"
 atomic_numbers(at::ASEAtoms) = pyobject(at)[:get_atomic_numbers]()
@@ -443,8 +443,8 @@ function extend!(at::ASEAtoms, atadd::ASEAtoms)::ASEAtoms
    return at
 end
 
-function extend!{S <: AbstractString}(at::ASEAtoms, atnew::Tuple{S,JVecF})
-   warn("`extend!(at, (s,x))` is deprecated; use `extend!(at, s, x)` instead")
+function extend!(at::ASEAtoms, atnew::Tuple{S,JVecF}) where S <: AbstractString
+   @warn("`extend!(at, (s,x))` is deprecated; use `extend!(at, s, x)` instead")
    extend!(at, atnew[1], atnew[2])
 end
 

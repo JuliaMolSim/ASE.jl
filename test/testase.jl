@@ -1,6 +1,6 @@
 
 
-using Base.Test, ASE, NeighbourLists
+using Test, ASE, NeighbourLists
 
 
 # ======================================================================
