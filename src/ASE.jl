@@ -81,9 +81,10 @@ set_constraint!(at::ASEAtoms, cons::AbstractConstraint) = (at.cons = cons; at)
 constraint(at::ASEAtoms) = at.cons
 
 positions(at::ASEAtoms) = at.po[:get_positions]()' |> vecs |> collect
-set_positions!(at::ASEAtoms, X::Matrix) = (at.po[:set_positions](X'); at)
+set_positions!(at::ASEAtoms, X::Matrix) = (at.po[:set_positions](convert(Matrix, X')); at)
 set_positions!(at::ASEAtoms, X::JVecsF) = set_positions!(at, Matrix(mat(X)))
 # TODO: rever to "clever" set_positions!
+# TODO: how to get rid of the `convert`? There is an awful lot of copying going on here!
 # function set_positions!(a::ASEAtoms, p::JVecsF)
 #    pold = positions(a)
 #    r = maxdist(pold, p)
