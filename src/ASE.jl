@@ -192,6 +192,16 @@ import Base.*
 *(at::ASEAtoms, n::Integer) = repeat(at, (n,n,n))
 *(n::Integer, at::ASEAtoms) = repeat(at, (n,n,n))
 
+function deleteat!(at::ASEAtoms, n::Integer)
+   at.po[:__delitem__](n-1) # delete in the actual array
+   # update_transient_data!(at, Inf)
+   return at
+end
+
+# function deleteat!(at::ASEAtoms, nn)
+#    deleteat!(at, collect(nn) - 1)
+#    return at
+# end
 
 # ======================== CALCULATORS ===============================
 

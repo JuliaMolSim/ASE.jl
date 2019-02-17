@@ -1,10 +1,11 @@
 using JuLIP
 
+@pyimport ase.calculators.emt as emt       # import the EMT model
 println("Test Direct use of ASECalculator")
 at = bulk("Cu", cubic=true) * 2    # generate periodic Cu supercell
 deleteat!(at, 1)                       # vacancy defect
 try
-   @pyimport ase.calculators.emt as emt   # import the EMT model
+
    calc = ASECalculator(emt.EMT())        # wrap it into a Julia Object
    @show energy(calc, at)                 # compute the energy
    @show maximum(norm.(forces(calc, at)))
