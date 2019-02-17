@@ -9,7 +9,7 @@ Julia Bindings for the [Atomic Simulation Environment (ASE)](https://wiki.fysik.
 
 Provides Julia wrappers for a limited subset of ASE's functionality, to be used within
 [JuLIP.jl](https://github.com/libAtoms/JuLIP.jl). On top of `JuLIP.jl`, which is
-a pure Julia library, `ASE.jl` also provides an interface to ASE, via [PyCall.jl].
+a pure Julia library, `ASE.jl` also provides an interface to ASE, via [PyCall.jl](https://github.com/JuliaPy/PyCall.jl).
 
 ### Getting Started
 
