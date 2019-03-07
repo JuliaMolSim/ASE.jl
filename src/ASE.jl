@@ -80,8 +80,8 @@ calculator(at::ASEAtoms) = at.calc
 set_constraint!(at::ASEAtoms, cons::AbstractConstraint) = (at.cons = cons; at)
 constraint(at::ASEAtoms) = at.cons
 
-positions(at::ASEAtoms) = at.po[:get_positions]()' |> vecs |> collect
-set_positions!(at::ASEAtoms, X::Matrix) = (at.po[:set_positions](convert(Matrix, X')); at)
+positions(at::ASEAtoms) = at.po.get_positions()' |> vecs |> collect
+set_positions!(at::ASEAtoms, X::Matrix) = (at.po.set_positions(convert(Matrix, X')); at)
 set_positions!(at::ASEAtoms, X::AbstractVector{JVecF}) = set_positions!(at, Matrix(mat(X)))
 # TODO: revert to "clever" set_positions!
 # TODO: how to get rid of the `convert`? There is an awful lot of copying going on here!
@@ -89,23 +89,23 @@ set_positions!(at::ASEAtoms, X::AbstractVector{JVecF}) = set_positions!(at, Matr
 #    pold = positions(a)
 #    r = maxdist(pold, p)
 #    p_py = PyReverseDims(mat(p))
-#    a.po[:set_positions](p_py)
+#    a.po.set_positions(p_py)
 #    update_transient_data!(a, r)
 #    return a
 # end
 
 length(at::ASEAtoms) = length(positions(at))
 # TODO: could be made efficient by staying in Python
-#       e.g. size(at.po[:get_positions](), 1)
+#       e.g. size(at.po.get_positions(), 1)
 
 set_pbc!(at::ASEAtoms, val::Bool) = set_pbc!(at, (val,val,val))
-set_pbc!(at::ASEAtoms, val::NTuple{3,Bool}) = (at.po[:pbc] = val; at)
+set_pbc!(at::ASEAtoms, val::NTuple{3,Bool}) = (at.po.pbc = val; at)
 set_pbc!(at::ASEAtoms, val::AbstractVector{Bool}) = set_pbc!(at, tuple(val...))
-pbc(a::ASEAtoms) = a.po[:pbc]
+pbc(a::ASEAtoms) = a.po.pbc
 
 
-cell(at::ASEAtoms) = at.po[:get_cell]()
-set_cell!(at::ASEAtoms, p::Matrix) = (at.po[:set_cell](p); at)
+cell(at::ASEAtoms) = at.po.get_cell()
+set_cell!(at::ASEAtoms, p::Matrix) = (at.po.set_cell(p); at)
 # TODO: if we want to return to transient data
 # A = pinv(cell(a)) * p
 # update_transient_data!(a, vecnorm(A))
@@ -113,24 +113,24 @@ set_cell!(at::ASEAtoms, p::Matrix) = (at.po[:set_cell](p); at)
 
 # special arrays: momenta, velocities, masses, chemical_symbols
 "get the momenta array"
-momenta(at::ASEAtoms) = at.po[:get_momenta]()' |> vecs
+momenta(at::ASEAtoms) = at.po.get_momenta()' |> vecs
 "set the momenta array"
-set_momenta!(at::ASEAtoms, p::JVecsF) = at.po[:set_momenta](p |> mat |> PyReverseDims)
+set_momenta!(at::ASEAtoms, p::JVecsF) = at.po.set_momenta(p |> mat |> PyReverseDims)
 "get the velocities array (convert from momenta)"
-velocities(at::ASEAtoms) = at.po[:get_velocities]()' |> vecs
+velocities(at::ASEAtoms) = at.po.get_velocities()' |> vecs
 "convert to momenta, then set the momenta array"
-set_velocities!(at::ASEAtoms, v::JVecsF) = at.po[:set_velocities](v |> mat |> PyReverseDims)
+set_velocities!(at::ASEAtoms, v::JVecsF) = at.po.set_velocities(v |> mat |> PyReverseDims)
 "get Vector of atom masses"
-masses(at::ASEAtoms) = at.po[:get_masses]()
+masses(at::ASEAtoms) = at.po.get_masses()
 "set atom mass array as Vector{Float64}"
-set_masses!(at::ASEAtoms, m::Vector{Float64}) = at.po[:set_masses](m)
+set_masses!(at::ASEAtoms, m::Vector{Float64}) = at.po.set_masses(m)
 "return vector of chemical symbols as strings"
-chemical_symbols(at::ASEAtoms) = pyobject(at)[:get_chemical_symbols]()
+chemical_symbols(at::ASEAtoms) = pyobject(at).get_chemical_symbols()
 "set the chemical symbols"
 set_chemical_symbols!(at::ASEAtoms, s::Vector{T}) where {T <: AbstractString} =
-   pyobject(at)[:set_chemical_symbols](s)
+   pyobject(at).set_chemical_symbols(s)
 "return vector of atomic numbers"
-atomic_numbers(at::ASEAtoms) = pyobject(at)[:get_atomic_numbers]()
+atomic_numbers(at::ASEAtoms) = pyobject(at).get_atomic_numbers()
 
 
 
@@ -166,27 +166,16 @@ function ASEAtoms(at::Atoms)
    set_constraint!(at_ase, constraint(at))
 end
 
-# -------------- Calling a JuLIP Calculator on ASEAtoms --------------
-
-energy(V::AbstractCalculator, at::ASEAtoms) = energy(V, Atoms(at))
-forces(V::AbstractCalculator, at::ASEAtoms) = forces(V, Atoms(at))
-virial(V::AbstractCalculator, at::ASEAtoms) = virial(V, Atoms(at))
-stress(V::AbstractCalculator, at::ASEAtoms) = stress(V, Atoms(at))
-
-energy(V::ASECalculator, at::Atoms) = energy(V, ASEAtoms(at))
-forces(V::ASECalculator, at::Atoms) = forces(V, ASEAtoms(at))
-virial(V::ASECalculator, at::Atoms) = virial(V, ASEAtoms(at))
-stress(V::ASECalculator, at::Atoms) = stress(V, ASEAtoms(at))
 
 # ===================== BUILD ATOMS =================================
 
-# @doc ase_build.bulk[:__doc__] ->
+# @doc ase_build.bulk.__doc__ ->
 bulk(s::AbstractString, args...; pbc=true, kwargs...) =
    set_pbc!(ASEAtoms(ase_build.bulk(s, args...; kwargs...)), pbc)
 
 build(sym::Symbol, args...; kwargs...) = ase_build[sym](args...; kwargs...)
 
-repeat(a::ASEAtoms, n::NTuple{3, Int64}) = ASEAtoms(a.po[:repeat](n))
+repeat(a::ASEAtoms, n::NTuple{3, Int64}) = ASEAtoms(a.po.repeat(n))
 repeat(a::ASEAtoms, n::AbstractArray) = repeat(a, tuple(n...))
 
 import Base.*
@@ -196,7 +185,7 @@ import Base.*
 *(n::Integer, at::ASEAtoms) = repeat(at, (n,n,n))
 
 function deleteat!(at::ASEAtoms, n::Integer)
-   at.po[:__delitem__](n-1) # delete in the actual array
+   at.po.__delitem__(n-1) # delete in the actual array
    # update_transient_data!(at, Inf)
    return at
 end
@@ -226,7 +215,7 @@ mutable struct ASECalculator <: AbstractASECalculator
 end
 
 function set_calculator!(at::ASEAtoms, calc::AbstractASECalculator)
-   at.po[:set_calculator](calc.po)
+   at.po.set_calculator(calc.po)
    at.calc = calc
    return at
 end
@@ -234,11 +223,11 @@ end
 set_calculator!(at::ASEAtoms, po::PyObject) =
       set_calculator!(at, AbstractASECalculator(po))
 
-forces(calc::AbstractASECalculator, at::ASEAtoms) = calc.po[:get_forces](at.po)' |> vecs
-energy(calc::AbstractASECalculator, at::ASEAtoms) = calc.po[:get_potential_energy](at.po)
+forces(calc::AbstractASECalculator, at::ASEAtoms) = calc.po.get_forces(at.po)' |> vecs
+energy(calc::AbstractASECalculator, at::ASEAtoms) = calc.po.get_potential_energy(at.po)
 
 function virial(calc::AbstractASECalculator, at::ASEAtoms)
-    s = calc.po[:get_stress](at.po)
+    s = calc.po.get_stress(at.po)
     vol = det(cell(at))
     if size(s) == (6,)
       # unpack stress from compressed Voigt vector form
@@ -274,7 +263,7 @@ extend!(at, s, x)
 where `s` is a string, `x::JVecF` a position
 """
 function extend!(at::ASEAtoms, atadd::ASEAtoms)::ASEAtoms
-   at.po[:extend](atadd.po)
+   at.po.extend(atadd.po)
    return at
 end
 
@@ -300,7 +289,7 @@ write_xyz(filehandle::PyObject, at::ASEAtoms) = ase_io.write(filehandle, at.po, 
 
 # open and close files from Python (to get a python filehandle)
 pyopenf(filename::AbstractString, mode::AbstractString) = py"open($(filename), $(mode))"
-pyclosef(filehandle) = filehandle[:close]()
+pyclosef(filehandle) = filehandle.close()
 
 function write_xyz(filename::AbstractString, at::ASEAtoms, xs::AbstractVector{Dofs}, mode=:write)
    x0 = dofs(at) # save the dofs
@@ -337,7 +326,7 @@ read_xyz(filename::AbstractString) = ASEAtoms(ase_io.read(filename))
 # ASEAtoms(s::AbstractString) = ASEAtoms(ase_atoms.Atoms(s))
 
 # function deleteat!(at::ASEAtoms, n::Integer)
-#    at.po[:__delitem__](n-1) # delete in the actual array
+#    at.po.__delitem__(n-1) # delete in the actual array
 #    update_transient_data!(at, Inf)
 #    return at
 # end
@@ -365,5 +354,21 @@ read_xyz(filename::AbstractString) = ASEAtoms(ase_io.read(filename))
 include("nlist.jl")
 
 include("models.jl")
+
+
+# -------------- Calling a JuLIP Calculator on ASEAtoms --------------
+
+energy(V::AbstractCalculator, at::ASEAtoms) = energy(V, Atoms(at))
+forces(V::AbstractCalculator, at::ASEAtoms) = forces(V, Atoms(at))
+virial(V::AbstractCalculator, at::ASEAtoms) = virial(V, Atoms(at))
+stress(V::AbstractCalculator, at::ASEAtoms) = stress(V, Atoms(at))
+
+# -------------- and ASE Calculator on JuLIP Atoms --------------
+
+energy(V::AbstractASECalculator, at::Atoms) = energy(V, ASEAtoms(at))
+forces(V::AbstractASECalculator, at::Atoms) = forces(V, ASEAtoms(at))
+virial(V::AbstractASECalculator, at::Atoms) = virial(V, ASEAtoms(at))
+stress(V::AbstractASECalculator, at::Atoms) = stress(V, ASEAtoms(at))
+
 
 end

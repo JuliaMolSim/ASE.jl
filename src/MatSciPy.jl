@@ -60,7 +60,7 @@ function __neighbour_list__(atoms::ASEAtoms,
    # compute the neighbourlist via matscipy, get the data as
    # PyArrays, i.e., just references, no copies
 
-   results = pycall(matscipy_neighbours["neighbour_list"],
+   results = pycall(matscipy_neighbours.neighbour_list,
                      NTuple{length(quantities), PyArray}, quantities,
                      pyobject(atoms), cutoff)
    # create Julia arrays ~~~referencing the same memory~~~

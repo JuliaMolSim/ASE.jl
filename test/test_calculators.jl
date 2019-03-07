@@ -5,14 +5,16 @@ println("Test Direct use of ASECalculator")
 at = bulk("Cu", cubic=true) * 2    # generate periodic Cu supercell
 deleteat!(at, 1)                       # vacancy defect
 try
-
    calc = ASECalculator(emt.EMT())        # wrap it into a Julia Object
    @show energy(calc, at)                 # compute the energy
    @show maximum(norm.(forces(calc, at)))
-   @test true
+   println(@test true)
+
+   atj = Atoms(at)
+   println(@test energy(calc, at) ≈ energy(calc, atj))
 catch
    println("failed ASECalculator Test")
-   @test false
+   println(@test false)
 end
 
 
