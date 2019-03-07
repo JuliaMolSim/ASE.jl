@@ -16,8 +16,8 @@ using JuLIP.Potentials: WrappedAnalyticFunction, F64fun,
 import JuLIP.Potentials: energy, forces
 
 # get access to the atomic numbers
-@pyimport ase.calculators.emt as ase_emt
-@pyimport ase.data as ase_data
+ase_emt = pyimport("ase.calculators.emt")
+ase_data = pyimport("ase.data")
 
 
 """

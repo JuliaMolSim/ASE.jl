@@ -23,7 +23,7 @@ Quick test
 using ASE
 at = bulk("Cu", cubic=true) * 2        # generate periodic Cu supercell
 deleteat!(at, 1)                       # vacancy defect
-@pyimport ase.calculators.emt as emt   # import the EMT model
+emt = pyimport("ase.calculators.emt")  # import the EMT model
 calc = ASECalculator(emt.EMT())        # wrap it into a Julia Object
 @show energy(calc, at)                 # compute the energy
 # -------------------------------------------

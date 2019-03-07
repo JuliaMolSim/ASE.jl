@@ -1,6 +1,6 @@
 using JuLIP
 
-@pyimport ase.calculators.emt as emt       # import the EMT model
+emt = pyimport("ase.calculators.emt")        # import the EMT model
 println("Test Direct use of ASECalculator")
 at = bulk("Cu", cubic=true) * 2    # generate periodic Cu supercell
 deleteat!(at, 1)                       # vacancy defect

@@ -1,5 +1,5 @@
 julia 0.7
-PyCall
+PyCall 1.90.0
 JuLIP 0.6.0
 NeighbourLists 0.3.0
 Reexport

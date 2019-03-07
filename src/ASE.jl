@@ -44,9 +44,9 @@ export ASEAtoms,      # ✓
       static_neighbourlist,
       read_xyz, write_xyz
 
-@pyimport ase.build as ase_build
-@pyimport ase.atoms as ase_atoms
-@pyimport ase.io as ase_io
+ase_build = pyimport("ase.build")
+ase_atoms = pyimport("ase.atoms")
+ase_io    = pyimport("ase.io")
 
 
 """
@@ -173,7 +173,10 @@ forces(V::AbstractCalculator, at::ASEAtoms) = forces(V, Atoms(at))
 virial(V::AbstractCalculator, at::ASEAtoms) = virial(V, Atoms(at))
 stress(V::AbstractCalculator, at::ASEAtoms) = stress(V, Atoms(at))
 
-
+energy(V::ASECalculator, at::Atoms) = energy(V, ASEAtoms(at))
+forces(V::ASECalculator, at::Atoms) = forces(V, ASEAtoms(at))
+virial(V::ASECalculator, at::Atoms) = virial(V, ASEAtoms(at))
+stress(V::ASECalculator, at::Atoms) = stress(V, ASEAtoms(at))
 
 # ===================== BUILD ATOMS =================================
 
