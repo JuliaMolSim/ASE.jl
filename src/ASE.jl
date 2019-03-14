@@ -33,6 +33,8 @@ using JuLIP: mat, vecs, JVecF, JVecs, JVecsF, JMatF,
       AbstractCalculator, NullCalculator, maxdist, SVec,
       Dofs, set_dofs!
 
+using LinearAlgebra: det
+
 # extra ASE functionality:
 import Base: repeat         # ✓
 
@@ -358,17 +360,17 @@ include("models.jl")
 
 # -------------- Calling a JuLIP Calculator on ASEAtoms --------------
 
-energy(V::AbstractCalculator, at::ASEAtoms) = energy(V, Atoms(at))
-forces(V::AbstractCalculator, at::ASEAtoms) = forces(V, Atoms(at))
-virial(V::AbstractCalculator, at::ASEAtoms) = virial(V, Atoms(at))
-stress(V::AbstractCalculator, at::ASEAtoms) = stress(V, Atoms(at))
+# energy(V::AbstractCalculator, at::ASEAtoms) = energy(V, Atoms(at))
+# forces(V::AbstractCalculator, at::ASEAtoms) = forces(V, Atoms(at))
+# virial(V::AbstractCalculator, at::ASEAtoms) = virial(V, Atoms(at))
+# stress(V::AbstractCalculator, at::ASEAtoms) = stress(V, Atoms(at))
 
 # -------------- and ASE Calculator on JuLIP Atoms --------------
 
 energy(V::AbstractASECalculator, at::Atoms) = energy(V, ASEAtoms(at))
 forces(V::AbstractASECalculator, at::Atoms) = forces(V, ASEAtoms(at))
 virial(V::AbstractASECalculator, at::Atoms) = virial(V, ASEAtoms(at))
-stress(V::AbstractASECalculator, at::Atoms) = stress(V, ASEAtoms(at))
+# stress(V::AbstractASECalculator, at::Atoms) = stress(V, ASEAtoms(at))
 
 
 end
