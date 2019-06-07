@@ -10,7 +10,7 @@ PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 
 [compat]
-julia = "0.7.0"
-JuLIP = "0.6.0"
-NeighbourLists = "0.3.0"
-PyCall = "1.90.0"
+julia = "^0.7.0"
+JuLIP = "^0.6.0"
+NeighbourLists = "^0.3.0"
+PyCall = "^1.90.0"
