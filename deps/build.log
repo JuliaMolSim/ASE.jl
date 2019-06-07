@@ -1,5 +1,0 @@
-┌ Warning: Deprecated syntax ``const` declaration on local variable` around /Users/ortner/.julia/packages/PyCall/0jMpb/src/PyCall.jl:536.
-└ @ ~/.julia/packages/PyCall/0jMpb/src/PyCall.jl:536
-┌ Warning: Deprecated syntax ``const` declaration on local variable` around /Users/ortner/.julia/packages/PyCall/0jMpb/src/PyCall.jl:536.
-└ @ ~/.julia/packages/PyCall/0jMpb/src/PyCall.jl:536
-Installing Dependencies of `ASE.jl`: `ase` and `matscipy`
