@@ -11,6 +11,6 @@ Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 
 [compat]
 julia = "0.7, 1"
-JuLIP = "≧ 0.6.0"
-NeighbourLists = "≧ 0.3.0"
-PyCall = "≧ 1.90.0"
+JuLIP = "≥ 0.6.0"
+NeighbourLists = "≥ 0.3.0"
+PyCall = "≥ 1.90.0"
