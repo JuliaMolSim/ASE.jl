@@ -1,5 +1,5 @@
 
-__precompile__(false)
+__precompile__()
 
 module ASE
 
