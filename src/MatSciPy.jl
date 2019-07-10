@@ -22,7 +22,7 @@ using PyCall, NeighbourLists
 
 matscipy_neighbours = pyimport("matscipy.neighbours")
 
-using JuLIP:  cutoff, JVecs, vecs, cell
+using JuLIP:  cutoff, vecs, cell, JVecF, JVec 
 using ASE: ASEAtoms, pyobject
 
 import NeighbourLists: sites, pairs, nsites, npairs
@@ -100,8 +100,8 @@ mutable struct NeighbourList
     i::Vector{Int32}
     j::Vector{Int32}
     r::Vector{Float64}
-    R::JVecs{Float64}
-    S::JVecs{Int32}
+    R::Vector{JVecF}
+    S::Vector{JVec{Int32}}
     pyarrays
     length::Int
 end

@@ -14,7 +14,6 @@ import JuLIP:
       cell, set_cell!,             # ✓
       pbc, set_pbc!,               # ✓
       calculator, set_calculator!, # ✓
-      constraint, set_constraint!, # ✓
       neighbourlist,                # ✓
       energy, forces, virial, stress,
       momenta, set_momenta!,
@@ -28,9 +27,9 @@ import JuLIP:
 import Base.length, Base.deleteat!, Base.deepcopy
 
 # from arrayconversions:
-using JuLIP: mat, vecs, JVecF, JVecs, JVecsF, JMatF,
-      AbstractAtoms, AbstractConstraint, NullConstraint,
-      AbstractCalculator, NullCalculator, maxdist, SVec,
+using JuLIP: mat, vecs, JVecF, JMatF,
+      AbstractAtoms,
+      AbstractCalculator, maxdist, SVec,
       Dofs, set_dofs!
 
 using LinearAlgebra: det
@@ -64,23 +63,21 @@ ASEAtoms(at::Atoms)            # from a JuLIP Atoms object
 ```
 
 """
-mutable struct ASEAtoms <: AbstractAtoms
+mutable struct ASEAtoms <: AbstractAtoms{Float64}
    po::PyObject       # ase.Atoms instance
-   calc::AbstractCalculator
-   cons::AbstractConstraint
+   calc::Union{AbstractCalculator, Nothing}
 end
 
+Base.eltype(::ASEAtoms) = Float64
 
-ASEAtoms(po::PyObject) = ASEAtoms(po, NullCalculator(), NullConstraint())
+ASEAtoms(po::PyObject) = ASEAtoms(po, nothing)
 pyobject(a::ASEAtoms) = a.po
 
 # this one is needed e.g. for JuLIP conversions
 ASEAtoms(s::AbstractString) = ASEAtoms(ase_atoms.Atoms(s))
 
-set_calculator!(at::ASEAtoms, calc::AbstractCalculator) = (at.calc = calc; at)
+set_calculator!(at::ASEAtoms, calc::Union{AbstractCalculator, Nothing}) = (at.calc = calc; at)
 calculator(at::ASEAtoms) = at.calc
-set_constraint!(at::ASEAtoms, cons::AbstractConstraint) = (at.cons = cons; at)
-constraint(at::ASEAtoms) = at.cons
 
 positions(at::ASEAtoms) = at.po.get_positions()' |> vecs |> collect
 set_positions!(at::ASEAtoms, X::Matrix) = (at.po.set_positions(convert(Matrix, X')); at)
@@ -117,11 +114,11 @@ set_cell!(at::ASEAtoms, p::Matrix) = (at.po.set_cell(p); at)
 "get the momenta array"
 momenta(at::ASEAtoms) = at.po.get_momenta()' |> vecs
 "set the momenta array"
-set_momenta!(at::ASEAtoms, p::JVecsF) = at.po.set_momenta(p |> mat |> PyReverseDims)
+set_momenta!(at::ASEAtoms, p::AbstractVector{<:JVec}) = at.po.set_momenta(p |> mat |> PyReverseDims)
 "get the velocities array (convert from momenta)"
 velocities(at::ASEAtoms) = at.po.get_velocities()' |> vecs
 "convert to momenta, then set the momenta array"
-set_velocities!(at::ASEAtoms, v::JVecsF) = at.po.set_velocities(v |> mat |> PyReverseDims)
+set_velocities!(at::ASEAtoms, v::AbstractVector{<:JVec}) = at.po.set_velocities(v |> mat |> PyReverseDims)
 "get Vector of atom masses"
 masses(at::ASEAtoms) = at.po.get_masses()
 "set atom mass array as Vector{Float64}"
@@ -152,8 +149,7 @@ Atoms(at_ase::ASE.ASEAtoms) =
           atomic_numbers(at_ase) |> collect,
           JMat{Float64}(cell(at_ase)),
           pbc(at_ase);
-          calc = calculator(at_ase),
-          cons = constraint(at_ase) )
+          calc = calculator(at_ase) )
 
 function ASEAtoms(at::Atoms)
    # simplify by assuming there is only one species
@@ -165,7 +161,6 @@ function ASEAtoms(at::Atoms)
    set_cell!(at_ase, Matrix(cell(at)))
    set_pbc!(at_ase, tuple(pbc(at)...))
    set_calculator!(at_ase, calculator(at))
-   set_constraint!(at_ase, constraint(at))
 end
 
 
