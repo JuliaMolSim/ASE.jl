@@ -148,8 +148,8 @@ Atoms(at_ase::ASE.ASEAtoms) =
           masses(at_ase) |> collect,
           atomic_numbers(at_ase) |> collect,
           JMat{Float64}(cell(at_ase)),
-          pbc(at_ase);
-          calc = calculator(at_ase) )
+          pbc(at_ase),
+          calculator(at_ase) )
 
 function ASEAtoms(at::Atoms)
    # simplify by assuming there is only one species
