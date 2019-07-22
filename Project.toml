@@ -1,6 +1,6 @@
 name = "ASE"
 uuid = "51974c44-a7ed-5088-b8be-3e78c8ba416c"
-version = "0.4.1"
+version = "0.4.2"
 
 [deps]
 JuLIP = "945c410c-986d-556a-acb1-167a618e0462"
@@ -12,8 +12,7 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [compat]
 julia = "0.7, 1"
-JuLIP = "≥ 0.6.0"
-NeighbourLists = "≥ 0.3.0"
+JuLIP = "^0.7.3"
 PyCall = "≥ 1.90.0"
 
 [extras]
