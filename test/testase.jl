@@ -2,7 +2,6 @@
 
 using Test, ASE, NeighbourLists
 using LinearAlgebra: norm
-include("aux.jl")
 
 h1("Misc ASE Tests")
 
