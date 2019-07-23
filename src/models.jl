@@ -2,6 +2,7 @@
 module Models
 
 using PyCall
+using ASE: ASECalculator
 
 """
 Creates an `ASECalculator` that uses `ase.calculators.emt` to compute
