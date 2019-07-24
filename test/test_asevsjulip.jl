@@ -22,7 +22,13 @@ println(@test norm(forces(pyemt, at) - forces(emt, at), Inf) < 1e-10)
 h3("Compare JuLIP vs ASE: EAM")
 
 
-pot_file = joinpath(dirname(pathof(JuLIP)), "..", "data", "w_eam4.fs")
+# pot_file = joinpath(dirname(pathof(JuLIP)), "..", "data", "w_eam4.fs")
+pot_file = @__DIR__() * "/w_eam4.fs"
+url = "https://www.ctcms.nist.gov/potentials/Download/2013--Marinica-M-C-Ventelon-L-Gilbert-M-R-et-al--W-4/1/w_eam4.fs"
+if !isfile(pot_file)
+   @info("Download an Example EAM potential")
+   run(`curl -o $pot_file $url`)
+end
 
 @info("Generate the ASE potential")
 eam4_ase = ASE.Models.EAM(pot_file)
