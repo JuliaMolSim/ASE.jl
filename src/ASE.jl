@@ -103,7 +103,9 @@ set_pbc!(at::ASEAtoms, val::AbstractVector{Bool}) = set_pbc!(at, tuple(val...))
 pbc(a::ASEAtoms) = a.po.pbc
 
 
-cell(at::ASEAtoms) = at.po.get_cell()
+cell(at::ASEAtoms) = _convert_cell(at.po.get_cell())
+_convert_cell(C::Array) = C
+_convert_cell(C::PyObject) = C.__array__()
 set_cell!(at::ASEAtoms, p::Matrix) = (at.po.set_cell(p); at)
 # TODO: if we want to return to transient data
 # A = pinv(cell(a)) * p
