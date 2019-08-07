@@ -48,11 +48,11 @@ for (i, (at, at_ase)) in enumerate(zip([at1, at2], [at1_ase, at2_ase]))
    err_low = (energy(eam4_ase, at_ase) - energy(eam4_jl1, at)) / length(at)
    err_med = (energy(eam4_ase, at_ase) - energy(eam4_jl2, at)) / length(at)
    err_hi = (energy(eam4_ase, at_ase) - energy(eam4_jl3, at)) / length(at)
-   println("   Low Accuracy energy error:", err_low, "; ",
+   println("      Low Accuracy energy error:", err_low, "; ",
          (@test abs(err_low) < 0.03))
-   println("   Low Accuracy energy error:", err_med, "; ",
+   println("   Medium Accuracy energy error:", err_med, "; ",
          (@test abs(err_med) < 0.006))
-   println("   Low Accuracy energy error:", err_hi, "; ",
+   println("     High Accuracy energy error:", err_hi, "; ",
          (@test abs(err_hi) < 0.0005))
 end
 
