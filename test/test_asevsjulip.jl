@@ -6,7 +6,7 @@ using Test, JuLIP.Testing, ASE, PyCall, JuLIP, LinearAlgebra
 h3("Compare JuLIP vs ASE: EMT")
 # JuLIP's EMT implementation
 at = set_pbc!( bulk(:Cu, cubic=true) * (2,2,2), (true,false,false) )
-rattle!(at, 0.02)
+rattle!(at, 0.1)
 emt = EMT(at)
 
 @info("Test JuLIP vs ASE EMT implementation")
@@ -15,6 +15,24 @@ print("   energy: ")
 println(@test abs(energy(emt, at) - energy(pyemt, at)) < 1e-10)
 print("   forces: ")
 println(@test norm(forces(pyemt, at) - forces(emt, at), Inf) < 1e-10)
+# ------------------------------------------------------------------------
+
+
+h3("Compare JuLIP vs ASE: EMT - Multi-species")
+# JuLIP's EMT implementation
+at = set_pbc!( bulk(:Cu, cubic=true) * (2,2,2), (true,false,false) )
+at.Z[5:10] .= atomic_number(:Al)
+@show unique(chemical_symbols(at))
+rattle!(at, 0.1)
+emt = EMT(at)
+
+@info("Test JuLIP vs ASE EMT implementation")
+pyemt = ASE.Models.EMT()
+print("   energy: ")
+println(@test abs(energy(emt, at) - energy(pyemt, at)) < 1e-10)
+print("   forces: ")
+println(@test norm(forces(pyemt, at) - forces(emt, at), Inf) < 1e-10)
+
 
 # ------------------------------------------------------------------------
 

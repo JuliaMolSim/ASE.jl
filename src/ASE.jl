@@ -76,6 +76,9 @@ pyobject(a::ASEAtoms) = a.po
 # this one is needed e.g. for JuLIP conversions
 ASEAtoms(s::AbstractString) = ASEAtoms(ase_atoms.Atoms(s))
 
+ASEAtoms(syms::AbstractVector{<:String}, X::AbstractVector{<: JVec}) =
+      ASEAtoms(ase_atoms.Atoms(collect(syms), collect(mat(X)')))
+
 set_calculator!(at::ASEAtoms, calc::Union{AbstractCalculator, Nothing}) = (at.calc = calc; at)
 calculator(at::ASEAtoms) = at.calc
 
@@ -155,11 +158,10 @@ Atoms(at_ase::ASE.ASEAtoms) =
 
 function ASEAtoms(at::Atoms)
    # simplify by assuming there is only one species
-   @assert length(unique(chemical_symbols(at))) == 1
-   sym = chemical_symbols(at)[1]
-   at_ase = ASEAtoms("$sym$(length(at))")
-   set_positions!(at_ase, positions(at))
+   syms = string.(chemical_symbols(at))
+   at_ase = ASEAtoms(syms, positions(at))
    set_momenta!(at_ase, momenta(at))
+   set_masses!(at_ase, masses(at))
    set_cell!(at_ase, Matrix(cell(at)))
    set_pbc!(at_ase, tuple(pbc(at)...))
    set_calculator!(at_ase, calculator(at))

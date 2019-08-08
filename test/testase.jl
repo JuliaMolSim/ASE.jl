@@ -1,6 +1,6 @@
 
 
-using Test, ASE, NeighbourLists
+using Test, ASE, NeighbourLists, JuLIP
 using LinearAlgebra: norm
 
 h1("Misc ASE Tests")
@@ -125,6 +125,16 @@ rm(fname)
 # ---------
 h3("Conversion between JuLIP.Atoms and ASEAtoms")
 at1 = bulk(:Si)          # JuLIP.Atoms
+at2 = ASEAtoms(at1)      # ASE.ASEAtoms
+@show cell(at2)
+at3 = Atoms(at2)         # JuLIP.Atoms
+println(@test at1 == at3)
+
+# ---------
+h3("Conversion between JuLIP.Atoms and ASEAtoms, Multi-species")
+at1 = bulk(:Al) * 3         # JuLIP.Atoms
+at1.Z[1:(length(at1)÷2)] .= atomic_number(:Ti)
+at1.M[:] .= 1.0 .+ rand(length(at1))
 at2 = ASEAtoms(at1)      # ASE.ASEAtoms
 @show cell(at2)
 at3 = Atoms(at2)         # JuLIP.Atoms
