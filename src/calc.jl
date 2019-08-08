@@ -1,5 +1,41 @@
 
-# ======================== CALCULATORS ===============================
+ASECalculator(po::PyObject) = ASECalculator(po, nothing, nothing)
+
+"""
+`update!(calc::ASECalculator, at::Atoms)`
+
+updates species, positions, cell, pbc. (only those features that
+will affect energy, forces, virial...)
+"""
+function update!(calc::ASECalculator, at::Atoms)
+   # if the `at, aseat` fields haven't been set yet, then
+   # start from scratch
+   if calc.at == nothing || calc.aseat == nothing
+      refresh!(calc, at)
+   end
+   # if the composition or length has changed, then we also start
+   # from scratch
+   if calc.at.Z != at.Z
+      refresh!(calc, at)
+   end
+   if at.X != calc.at.X
+      set_positions!(calc.at, at.X)
+      set_positions!(calc.aseat, at.X)
+   end
+   if at.cell != calc.at.cell
+      set_cell!(calc.at, at.cell)
+      set_cell!(calc.aseat, at.cell)
+   end
+   if at.pbc != calc.at.pbc
+      set_pbc!(calc.at, at.pbc)
+      set_cell!(calc.aseat, at.pbc)
+   end
+end
+
+function refresh!(calc::ASECalculator, at::Atoms)
+   calc.at = deepcopy(at)
+   calc.aseat = ASEAtoms(at)
+end
 
 
 forces(calc::ASECalculator, at::ASEAtoms) = calc.po.get_forces(at.po)' |> vecs

@@ -39,7 +39,8 @@ import Base: repeat         # ✓
 
 export ASEAtoms,      # ✓
        ASECalculator,
-       read_xyz, write_xyz
+       read_xyz, write_xyz,
+       velocities, set_velocities!
 
 
 build = ase_build = pyimport("ase.build")
@@ -66,9 +67,9 @@ end
 
 
 mutable struct ASECalculator <: AbstractCalculator
-   pycalc::PyObject
-   aseat::ASEAtoms
-   at::Atoms{Float64}
+   po::PyObject
+   aseat::Union{ASEAtoms, Nothing}
+   at::Union{Atoms{Float64}, Nothing}
 end
 
 # main functionality for ASEAtoms

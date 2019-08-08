@@ -4,38 +4,6 @@ Base.eltype(::ASEAtoms) = Float64
 pyobject(at::ASEAtoms) = at.po
 
 
-"""
-`update!(calc::ASECalculator, at::Atoms)`
-
-updates species, positions, cell, pbc. (only those features that
-will affect energy, forces, virial...)
-"""
-function update!(calc::ASECalculator, at::Atoms)
-   # if the composition or length has changed, then we just start
-   # from scratch
-   if calc.at.Z != at.Z
-      refresh!(calc, at)
-   end
-   if at.X != calc.at.X
-      set_positions!(calc.at, at.X)
-      set_positions!(calc.aseat, at.X)
-   end
-   if at.cell != calc.at.cell
-      set_cell!(calc.at, at.cell)
-      set_cell!(calc.aseat, at.cell)
-   end
-   if at.pbc != calc.at.pbc
-      set_pbc!(calc.at, at.pbc)
-      set_cell!(calc.aseat, at.pbc)
-   end
-end
-
-function refresh!(calc::ASECalculator, at::Atoms)
-   calc.at = deepcopy(at)
-   calc.aseat = ASEAtoms(at)
-end
-
-
 ASEAtoms(syms::AbstractVector{<:String}, X::AbstractVector{<: JVec}) =
       ASEAtoms(ase_atoms.Atoms(collect(syms), collect(mat(X)')))
 
@@ -106,7 +74,6 @@ function ASEAtoms(at::Atoms)
    set_masses!(at_ase, masses(at))
    set_cell!(at_ase, Matrix(cell(at)))
    set_pbc!(at_ase, tuple(pbc(at)...))
-   set_calculator!(at_ase, calculator(at))
 end
 
 
