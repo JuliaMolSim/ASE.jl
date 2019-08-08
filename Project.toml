@@ -1,6 +1,6 @@
 name = "ASE"
 uuid = "51974c44-a7ed-5088-b8be-3e78c8ba416c"
-version = "0.5.0"
+version = "0.5.1"
 
 [deps]
 JuLIP = "945c410c-986d-556a-acb1-167a618e0462"
