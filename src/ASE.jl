@@ -4,6 +4,7 @@ __precompile__(false)
 module ASE
 
 using Reexport
+using Requires
 
 @reexport using JuLIP
 @reexport using PyCall
@@ -45,9 +46,17 @@ export ASEAtoms,      # ✓
       static_neighbourlist,
       read_xyz, write_xyz
 
-ase_build = pyimport("ase.build")
-ase_atoms = pyimport("ase.atoms")
-ase_io    = pyimport("ase.io")
+const ase_build = PyNULL()
+const ase_atoms = PyNULL()
+const ase_io    = PyNULL()
+
+function __init__()
+    copy!(ase_build, pyimport_conda("ase.build", "ase", "rmg"))
+    copy!(ase_atoms, pyimport_conda("ase.atoms", "ase", "rmg"))
+    copy!(ase_io, pyimport_conda("ase.io", "ase", "rmg"))
+
+    @require MathSciPy="57607c6b-c3cc-413d-a9a9-cbaa249cbefd" include("nlist.jl")
+end
 
 
 """
@@ -352,7 +361,7 @@ read_xyz(filename::AbstractString) = ASEAtoms(ase_io.read(filename))
 # end
 
 
-include("nlist.jl")
+# include("nlist.jl")
 
 include("models.jl")
 
