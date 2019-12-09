@@ -5,8 +5,7 @@
 ############################################################
 
 # include("MatSciPy.jl")
-using MolSimPy
-using .MatSciPy: neighbourlist
+using MolSimPy: neighbourlist
 
 # TODO: no longer needed in the new ASE design
 # """
