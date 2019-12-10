@@ -50,12 +50,17 @@ const ase_build = PyNULL()
 const ase_atoms = PyNULL()
 const ase_io    = PyNULL()
 
-function __init__()
-    copy!(ase_build, pyimport_conda("ase.build", "ase", "rmg"))
-    copy!(ase_atoms, pyimport_conda("ase.atoms", "ase", "rmg"))
-    copy!(ase_io, pyimport_conda("ase.io", "ase", "rmg"))
+const hasmatscipy = Ref(false)
 
-    @require MathSciPy="57607c6b-c3cc-413d-a9a9-cbaa249cbefd" include("nlist.jl")
+function __init__()
+   copy!(ase_build, pyimport_conda("ase.build", "ase", "rmg"))
+   copy!(ase_atoms, pyimport_conda("ase.atoms", "ase", "rmg"))
+   copy!(ase_io, pyimport_conda("ase.io", "ase", "rmg"))
+
+   @require MathSciPy="57607c6b-c3cc-413d-a9a9-cbaa249cbefd" begin
+      using MolSimPy
+      hasmatscipy[] = true
+   end
 end
 
 
@@ -361,7 +366,7 @@ read_xyz(filename::AbstractString) = ASEAtoms(ase_io.read(filename))
 # end
 
 
-# include("nlist.jl")
+include("nlist.jl")
 
 include("models.jl")
 

@@ -4,8 +4,14 @@
 # matscipy neighbourlist functionality
 ############################################################
 
-# include("MatSciPy.jl")
-using MolSimPy: neighbourlist
+function neighbourlist(at::ASEAtoms, cutoff::Float64)
+   if ASE.hasmatscipy
+      return MatSciPy.NeighbourList(at, cutoff)
+   else
+      @error("matscipy not available. The MolSimPy package must be used for this additional functionality.")
+      return nothing
+   end
+end
 
 # TODO: no longer needed in the new ASE design
 # """
