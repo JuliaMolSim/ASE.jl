@@ -1,13 +1,15 @@
 h1("JuLIP vs ASE Calculator Tests")
 using Test, JuLIP.Testing, ASE, PyCall, JuLIP, LinearAlgebra
 
+##
+
 @info("These tests to compare JuLIP vs ASE implementations of some potentials")
 
 h3("Compare JuLIP vs ASE: EMT")
 # JuLIP's EMT implementation
 at = set_pbc!( bulk(:Cu, cubic=true) * (2,2,2), (true,false,false) )
 rattle!(at, 0.1)
-emt = EMT(at)
+emt = EMT()
 
 @info("Test JuLIP vs ASE EMT implementation")
 pyemt = ASE.Models.EMT()
@@ -15,8 +17,8 @@ print("   energy: ")
 println(@test abs(energy(emt, at) - energy(pyemt, at)) < 1e-10)
 print("   forces: ")
 println(@test norm(forces(pyemt, at) - forces(emt, at), Inf) < 1e-10)
-# ------------------------------------------------------------------------
 
+##
 
 h3("Compare JuLIP vs ASE: EMT - Multi-species")
 # JuLIP's EMT implementation
@@ -24,7 +26,7 @@ at = set_pbc!( bulk(:Cu, cubic=true) * (2,2,2), (true,false,false) )
 at.Z[5:10] .= atomic_number(:Al)
 @show unique(chemical_symbols(at))
 rattle!(at, 0.1)
-emt = EMT(at)
+emt = EMT()
 
 @info("Test JuLIP vs ASE EMT implementation")
 pyemt = ASE.Models.EMT()
@@ -34,8 +36,7 @@ print("   forces: ")
 println(@test norm(forces(pyemt, at) - forces(emt, at), Inf) < 1e-10)
 
 
-# ------------------------------------------------------------------------
-
+##
 
 h3("Compare JuLIP vs ASE: EAM")
 
@@ -74,7 +75,7 @@ for (i, (at, at_ase)) in enumerate(zip([at1, at2], [at1_ase, at2_ase]))
          (@test abs(err_hi) < 0.0005))
 end
 
-# ------------------------------------------------------------------------
+##
 
 h3("Compare JuLIP vs Quippy: SW")
 if ASE.Models.has_quippy()
