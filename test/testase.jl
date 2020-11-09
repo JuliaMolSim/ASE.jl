@@ -63,7 +63,9 @@ fname = "test.xyz"
 at = bulk("Cu") * 2
 write_xyz(fname, at)
 at2 = read_xyz(fname)
+at3 = readatoms(fname)
 println(@test positions(at) == positions(at2))
+println(@test positions(at) == positions(at3))
 rm(fname)
 
 # ---------

@@ -44,7 +44,7 @@ export ASEAtoms,      # ✓
       get_transient, has_transient,
       velocities, set_velocities!,
       static_neighbourlist,
-      read_xyz, write_xyz
+      readatoms, read_xyz, write_xyz
 
 const ase_build = PyNULL()
 const ase_atoms = PyNULL()
@@ -324,8 +324,9 @@ function write_xyz(filename::AbstractString, ats::AbstractVector{ASEAtoms}, mode
    pyclosef(filehandle)
 end
 
+readatoms(filename::AbstractString) = ASEAtoms(ase_io.read(filename))
 
-read_xyz(filename::AbstractString) = ASEAtoms(ase_io.read(filename))
+read_xyz(filename::AbstractString) = readatoms(filename)
 
 
 
