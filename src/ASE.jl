@@ -1,6 +1,3 @@
-
-__precompile__(false)
-
 module ASE
 
 using Reexport
